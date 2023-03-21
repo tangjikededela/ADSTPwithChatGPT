@@ -1,0 +1,33 @@
+digraph Tree {
+node [shape=box, style="rounded", color="black", fontname=helvetica] ;
+edge [fontname=helvetica] ;
+0 [label="node #0\nBS <= 8.5\nmse = 0.7\nsamples = 449\nvalue = 0.8"] ;
+1 [label="node #1\nSystolicBP <= 132.5\nmse = 0.4\nsamples = 339\nvalue = 0.5"] ;
+0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="True"] ;
+2 [label="node #2\nBodyTemp <= 99.5\nmse = 0.3\nsamples = 322\nvalue = 0.5"] ;
+1 -> 2 ;
+3 [label="node #3\nmse = 0.3\nsamples = 263\nvalue = 0.4"] ;
+2 -> 3 ;
+4 [label="node #4\nmse = 0.4\nsamples = 59\nvalue = 0.9"] ;
+2 -> 4 ;
+5 [label="node #5\nBS <= 6.8\nmse = 0.1\nsamples = 17\nvalue = 1.9"] ;
+1 -> 5 ;
+6 [label="node #6\nmse = 0.0\nsamples = 2\nvalue = 1.0"] ;
+5 -> 6 ;
+7 [label="node #7\nmse = 0.0\nsamples = 15\nvalue = 2.0"] ;
+5 -> 7 ;
+8 [label="node #8\nBS <= 9.5\nmse = 0.1\nsamples = 110\nvalue = 1.8"] ;
+0 -> 8 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
+9 [label="node #9\nHeartRate <= 83.0\nmse = 0.2\nsamples = 16\nvalue = 1.5"] ;
+8 -> 9 ;
+10 [label="node #10\nmse = 0.1\nsamples = 9\nvalue = 1.8"] ;
+9 -> 10 ;
+11 [label="node #11\nmse = 0.1\nsamples = 7\nvalue = 1.1"] ;
+9 -> 11 ;
+12 [label="node #12\nSystolicBP <= 135.0\nmse = 0.1\nsamples = 94\nvalue = 1.9"] ;
+8 -> 12 ;
+13 [label="node #13\nmse = 0.2\nsamples = 52\nvalue = 1.8"] ;
+12 -> 13 ;
+14 [label="node #14\nmse = 0.0\nsamples = 42\nvalue = 2.0"] ;
+12 -> 14 ;
+}

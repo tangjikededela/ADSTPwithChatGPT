@@ -1,0 +1,11 @@
+Overall,
+{%- if qs[0]==1-%}
+{%- if r2 < 2 and r2>=1%} the value of deviance divided by the degree of freedom is less than 2, so the model could be considered a moderately good fit for the dataset.
+{%- elif r2 < 1 and r2>=0.5%} the value of deviance divided by the degree of freedom is less than 1, so the model could be considered a very good fit for the dataset.
+{%- elif r2 < 0.5 %} the value of deviance divided by the degree of freedom is less than 0.5, so the model may be overfitting.
+{%- else %} the value of deviance divided by the degree of freedom is greater than 2, so the model may be underfitting.
+{%- endif -%}
+{%- endif -%}
+{%- if qs[1]==1%} In all factors, {{ss}} have a significant impact on {{ycol}}, however, {{nss}} do not have a significant impact on {{ycol}}. {%- endif -%}
+{%- if qs[1]==1 and qs[2]==1 %} In addition, {% endif -%} {%- if qs[2]==1-%} {{pos}} will increase the chance of improving {{ycol}}, and {{neg}} will decrease this chance. {%- endif -%}
+{%- if qs[3]==1%} Last but not the least, {{imp}} is the most important factor that affects {{ycol}}.{%- endif -%}
