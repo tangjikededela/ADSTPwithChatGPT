@@ -137,23 +137,23 @@ class general_datastory_pipeline:
         columns, linearData, predicted, mse, rmse, r2 = MD.LinearDefaultModel(X, y, Xcol)
         VW.LinearModelStats_view(data, Xcol, ycol, linearData, r2, questionset, trend,chatGPT,key)
 
-    def LogisticFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1]):
+    def LogisticFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1],chatGPT=0,key=""):
         if Xnewname != "" or ynewname != "":
             data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
         X = data[Xcol].values
         y = data[ycol]
         columns1, logisticData1, columns2, logisticData2, r2 = MD.LogisticrDefaultModel(X, y, Xcol)
-        VW.LogisticModelStats_view(data, Xcol, ycol, logisticData1, logisticData2, r2, questionset)
+        VW.LogisticModelStats_view(data, Xcol, ycol, logisticData1, logisticData2, r2, questionset,chatGPT,key)
 
     def GradientBoostingFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1],
                                    gbr_params={'n_estimators': 500, 'max_depth': 3, 'min_samples_split': 5,
-                                               'learning_rate': 0.01, 'loss': 'ls'}):
+                                               'learning_rate': 0.01},chatGPT=0,key=""):
         if Xnewname != "" or ynewname != "":
             data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
         X = data[Xcol].values
         y = data[ycol]
-        GBmodel, mse, rmse, r2,imp = MD.GradientBoostingDefaultModel(X, y, Xcol, gbr_params)
-        VW.GradientBoostingModelStats_view(data, Xcol, ycol, GBmodel, mse, rmse, r2,imp, questionset, gbr_params)
+        GBmodel, mse, rmse, r2,imp,train_errors,test_errors,DTData = MD.GradientBoostingDefaultModel(X, y, Xcol, gbr_params)
+        VW.GradientBoostingModelStats_view(data, Xcol, ycol, GBmodel, mse, rmse, r2,imp, questionset, gbr_params,train_errors,test_errors,DTData,chatGPT,key)
 
     def RandomForestFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1], n_estimators=10,
                                max_depth=3):
@@ -172,14 +172,15 @@ class general_datastory_pipeline:
         DTmodel, r2, mse, rmse, DTData = MD.DecisionTreeDefaultModel(X, y, Xcol, max_depth)
         VW.DecisionTreeModelStats_view(data, Xcol, ycol, DTData, DTmodel, r2, mse, questionset)
 
-    def GAMsFit(data, Xcol, ycol, Xnewname="", ynewname="", expect=1, epochs=100, splines='',chatGPT=0):
+    def GAMsFit(data, Xcol, ycol, Xnewname="", ynewname="", expect=1, epochs=100, splines='',chatGPT=0,key=""):
         if Xnewname != "" or ynewname != "":
             data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
         X = data[Xcol].values
         y = data[ycol]
-        gam, data, Xcol, ycol, r2, p, conflict, nss, ss, mincondition, condition, message= MD.GAMModel(data, Xcol, ycol,X, y,
+        gam, data, Xcol, ycol, r2, p, conflict, nss, ss, mincondition, condition,message= MD.GAMModel(data, Xcol, ycol,X, y,
                                                                                                expect, epochs, splines,chatGPT)
-        VW.GAMs_view(gam, data, Xcol, ycol, r2, p, conflict, nss, ss, mincondition, condition)
+
+        VW.GAMs_view(gam, data, Xcol, ycol, r2, p, conflict, nss, ss, mincondition, condition,chatGPT=chatGPT,key=key,predict=message)
 
 class special_datastory_pipelines_for_ACCCP:
     def register_question1(app_name, listTabs, register_dataset, per1000inCity_col, per1000nation_col,

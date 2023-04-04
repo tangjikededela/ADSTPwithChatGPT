@@ -171,6 +171,25 @@ def GradientBoostingDefaultModel(X, y, Xcol, gbr_params):
     rmse = mse ** (1 / 2.0)
     r2 = model.score(X_test, y_test)
     importance = model.feature_importances_
+    train_errors = []
+    test_errors = []
+    from itertools import islice
+
+    for i, y_pred in enumerate(model.staged_predict(X_train)):
+        if i % 10 == 0:
+            mse_train = mean_squared_error(y_train, y_pred)
+            train_errors.append(np.round(mse_train,3))
+            y_pred_test = model.staged_predict(X_test)
+            mse_test = mean_squared_error(y_test, next(islice(y_pred_test, i + 1)))
+            test_errors.append(np.round(mse_test,3))
+
+    # print(train_errors)
+    # print(test_errors)
+    # plt.plot(train_errors, label='Training MSE')
+    # plt.plot(test_errors, label='Testing MSE')
+    # plt.legend()
+    # plt.show()
+
     columns = {'important': importance}
     DTData = DataFrame(data=columns, index=Xcol)
     # summary = GB3.render(Xcol=Xcol)
@@ -178,7 +197,7 @@ def GradientBoostingDefaultModel(X, y, Xcol, gbr_params):
     for ind in DTData.index:
         if DTData['important'][ind] == max(DTData['important']):
             imp = ind
-    return (model, mse, rmse, r2, imp)
+    return (model, mse, rmse, r2, imp,train_errors,test_errors,DTData)
 
 
 def RandomForestDefaultModel(X, y, Xcol, n_estimators, max_depth):
@@ -241,7 +260,15 @@ def GAMModel(data, Xcol, ycol, X, y, expect=1, epochs=100, splines='', chatGPT=0
     condition = ""
     choose = expect
     conflict = [0] * np.size(Xcol)
-    message = f"Here is some data: "
+    message = []
+    # print(gam.summary())
+    coefficients = gam.coef_
+    equation = "y = "
+    for i in range(len(coefficients)):
+        term = " + " if i > 0 else ""
+        term += f"{coefficients[i]:.4f} * f{i}(x{i})"
+        equation += term
+    # print (equation)
     # Analysis and Story Generate
     for i in range(len(Xcol)):
         maxfirst = 0
@@ -249,7 +276,9 @@ def GAMModel(data, Xcol, ycol, X, y, expect=1, epochs=100, splines='', chatGPT=0
         XX = gam.generate_X_grid(term=i)
         Xpre = XX[:, i]
         ypre = gam.partial_dependence(term=i, X=XX)
-        message = message + "when " + Xcol[i] + " is " + str(Xpre) + ", the " + ycol + " is " + str(ypre) + ", "
+        Xpre = np.round(Xpre, 3)
+        ypre = np.around(ypre, 3)
+        message.append("when " + Xcol[i] + " is " + str(Xpre) + ", the " + ycol + " is " + str(ypre) + ".")
         # print(Xpre)
         # print(ypre)
         # Find min & max
@@ -380,14 +409,14 @@ def GAMModel(data, Xcol, ycol, X, y, expect=1, epochs=100, splines='', chatGPT=0
         conflict[i] = factor
     nss = ""
     ss = ""
-    message = message + " By comparing the above data, If "+str(Xcol)+ " are independent variables, "+ycol+" is dependent variable, under what circumstances the "+ycol+" could be as high as possible?"
+    #message = message + " By comparing the above data, If "+str(Xcol)+ " are independent variables, "+ycol+" is dependent variable, under what circumstances the "+ycol+" could be as high as possible?"
     for i in range(np.size(p) - 1):
         p[i] = round(p[i], 3)
         if p[i] > 0.05:
             nss = nss + "the " + Xcol[i] + ", "
         else:
             ss = ss + "the " + Xcol[i] + ", "
-    # print(message)
+    print(message)
     return (gam, data, Xcol, ycol, r2, p, conflict, nss, ss, mincondition, condition,message)
 
 

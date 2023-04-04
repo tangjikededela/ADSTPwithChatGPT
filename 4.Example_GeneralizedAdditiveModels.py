@@ -13,5 +13,6 @@ redwine_dataset = read_csv("./data/winequalityred.csv", header=None, names=col_n
 # the stories will be generated.
 pipeline = IP.general_datastory_pipeline
 pipeline.GAMsFit(redwine_dataset,
-                   ["citric acid", "chlorides", "free sulfur dioxide", "total sulfur dioxide", "sulphates", "alcohol"],
+                   ["citric acid","total sulfur dioxide", "alcohol"],
                    "quality")
+

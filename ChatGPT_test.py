@@ -21,23 +21,23 @@ import openai
 
 # openai.api_key='sk-something'
 #1
-messages = [
-    {"role": "system", "content": "You are a kind helpful assistant."},
-]
-
-question="For the second-hand car transaction data set. The current price, mileage traveled, resale quantity, and car production year are independent variables, and the final transaction price is the dependent variable, which is fitted with a linear model. The resulting r-squared is 0.854. So, is the relationship between the dependent variable and the independent variable strong?"
-# message = input("User : ")
-messages.append(
-    {"role": "user", "content": question},
-)
-chat = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo", messages=messages
-)
-
-reply = chat.choices[0].message.content
-print(f"ChatGPT: {reply}")
-messages.append({"role": "assistant", "content": reply})
-print(messages)
+# messages = [
+#     {"role": "system", "content": "You are a kind helpful assistant."},
+# ]
+#
+# question="For the second-hand car transaction data set. The current price, mileage traveled, resale quantity, and car production year are independent variables, and the final transaction price is the dependent variable, which is fitted with a linear model. The resulting r-squared is 0.854. So, is the relationship between the dependent variable and the independent variable strong?"
+# # message = input("User : ")
+# messages.append(
+#     {"role": "user", "content": question},
+# )
+# chat = openai.ChatCompletion.create(
+#     model="gpt-3.5-turbo", messages=messages
+# )
+#
+# reply = chat.choices[0].message.content
+# print(f"ChatGPT: {reply}")
+# messages.append({"role": "assistant", "content": reply})
+# print(messages)
 
 
 #
@@ -87,6 +87,7 @@ import json
 #         "Selling_Price": Selling_Price
 #     }
 # }
+
 from pandas import read_csv
 import ADSTP.IntegratedPipeline as IP
 
@@ -95,12 +96,37 @@ pipeline = IP.general_datastory_pipeline
 # Set replace variables names
 readable_names = dict((kv.split(': ') for kv in (l.strip(' \n') for l in open('./data/readableNamesForTenData.txt'))))
 
-fish_dataset = read_csv('./data/fish.csv')
+# Set the key
+key='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'
+
+# # Read Linear dataset and set columns
+dataset = read_csv('./data/fish.csv')
 Xcol = ['Length', 'Diagonal', 'Height', 'Width']
 ycol = 'Weight'
+dataset = read_csv('./data/car data.csv')
+Xcol = ['Present_Price', 'Kms_Driven', 'Year']; ycol = 'Selling_Price'
+pipeline.LinearFit(dataset, Xcol, ycol, [readable_names.get(key) for key in Xcol], readable_names.get(ycol),chatGPT=1,key=key)
 
-key='sk-'
-pipeline.LinearFit(fish_dataset, Xcol, ycol, [readable_names.get(key) for key in Xcol], readable_names.get(ycol),chatGPT=1,key=key)
+# # Read Logistic dataset and set columns
+# col_names = ['pregnant', 'glucose level', 'blood pressure', 'skin', 'insulin level', 'BMI', 'pedigree', 'age', 'diabetes']
+# diabetes_dataset = read_csv("./data/diabetes.csv", header=None, names=col_names)
+# Xcol =[ 'glucose level', 'blood pressure', 'insulin level', 'BMI', 'age']; ycol ='diabetes'
+# pipeline.LogisticFit(diabetes_dataset, Xcol, ycol,chatGPT=1,key=key)
 
+# Read GAMs dataset and set columns
+# col_names = ["citric acid", "chlorides", "free sulfur dioxide", "total sulfur dioxide", "sulphates", "alcohol",
+#              "quality"]
+# redwine_dataset = read_csv("./data/winequalityred.csv", header=None, names=col_names)
+# pipeline.GAMsFit(redwine_dataset,
+#                    ["citric acid","total sulfur dioxide", "alcohol"],
+#                    "quality",chatGPT=1,key=key)
 
-
+# # Read GB dataset and set columns
+# dataset=read_csv("./data/Maternal Health Risk Data Set.csv", header=0)
+# dataset['RiskLevel'].unique()
+# dataset['RiskLevel'] = dataset['RiskLevel'].replace('low risk', 0).replace('mid risk', 1).replace('high risk', 2)
+#
+# Xcol=["Age","SystolicBP","DiastolicBP","BodyTemp","HeartRate","BS"]
+# ycol="RiskLevel"
+# pipeline = IP.general_datastory_pipeline
+# pipeline.GradientBoostingFit(dataset,Xcol,ycol,chatGPT=1,key=key)
