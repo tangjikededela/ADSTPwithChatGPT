@@ -32,4 +32,4 @@ Run the above code, if successful, it will display "Dash is running on http://12
 
 Open this address, then you can see the content of a series of questions and answers to help you understand a linear regression model on the selected dataset.
 
-You can also replace the “LinearFit” to other model such as “LogisticFit”, “GAMsFit” etc. to see how well other models fit this dataset.
+You can also replace the “LinearFit” to other model such as “GAMsFit”, “GradientBoostingFit” etc. to see how well other models fit this dataset.
