@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
-import ADSTP.DataToInformationPipeline as MD
-import ADSTP.InformationToTextPipeline as VW
+import DataToInformationPipeline as MD
+import InformationToTextPipeline as VW
 import sys
 
 # creating the methods for the library
@@ -129,13 +129,18 @@ class general_datastory_for_pycaret_pipelines():
 
 
 class general_datastory_pipeline:
-    def LinearFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1], trend=[0,1,1],chatGPT=0,key=""):
+    def LinearFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1], expect="",chatGPT=0,key=""):
+        # "expect" is a list of size 3:
+        # The first value: 0 means that the user wants to explore how to make the dependent variable as small as possible, and 1 means how to make the dependent variable as large as possible.
+        # The second value: 0 means that the user expects a weak relationship between the dependent variable and the independent variable, and 1 means a strong relationship.
+        # The third value: 0 means that the user expects that each independent variable has no significant impact on the dependent variable, and 1 means that there is a significant impact.
+        # Their default value is "" to ignore user expectations.
         if Xnewname != "" or ynewname != "":
             data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
         X = data[Xcol].values
         y = data[ycol]
         columns, linearData, predicted, mse, rmse, r2 = MD.LinearDefaultModel(X, y, Xcol)
-        VW.LinearModelStats_view(data, Xcol, ycol, linearData, r2, questionset, trend,chatGPT,key)
+        VW.LinearModelStats_view(data, Xcol, ycol, linearData, r2, questionset, expect,chatGPT,key)
 
     def LogisticFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1],chatGPT=0,key=""):
         if Xnewname != "" or ynewname != "":

@@ -5,6 +5,7 @@ from pycaret import classification
 from pycaret import regression
 import matplotlib.pyplot as plt
 from pandas import DataFrame
+from itertools import islice
 import heapq
 import pwlf
 from GPyOpt.methods import BayesianOptimization
@@ -142,7 +143,6 @@ def LinearDefaultModel(X, y, Xcol):
 
 def LogisticrDefaultModel(X, y, Xcol):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
-    # from statsmodels.formula.api import logit
     model = sm.Logit(y_train, X_train).fit()
     # predictions = model.predict(X_test)
     # accuracy = accuracy_score(y_test, predictions)
@@ -173,7 +173,6 @@ def GradientBoostingDefaultModel(X, y, Xcol, gbr_params):
     importance = model.feature_importances_
     train_errors = []
     test_errors = []
-    from itertools import islice
 
     for i, y_pred in enumerate(model.staged_predict(X_train)):
         if i % 10 == 0:
@@ -182,17 +181,8 @@ def GradientBoostingDefaultModel(X, y, Xcol, gbr_params):
             y_pred_test = model.staged_predict(X_test)
             mse_test = mean_squared_error(y_test, next(islice(y_pred_test, i + 1)))
             test_errors.append(np.round(mse_test,3))
-
-    # print(train_errors)
-    # print(test_errors)
-    # plt.plot(train_errors, label='Training MSE')
-    # plt.plot(test_errors, label='Testing MSE')
-    # plt.legend()
-    # plt.show()
-
     columns = {'important': importance}
     DTData = DataFrame(data=columns, index=Xcol)
-    # summary = GB3.render(Xcol=Xcol)
     imp = ""
     for ind in DTData.index:
         if DTData['important'][ind] == max(DTData['important']):
@@ -254,7 +244,6 @@ def GAMModel(data, Xcol, ycol, X, y, expect=1, epochs=100, splines='', chatGPT=0
     r2 = gam.statistics_.get('pseudo_r2')
     p = gam.statistics_.get('p_values')
     # Plotting
-    # fig, axs = plt.subplots(1, np.size(Xcol), figsize=(40, 10))
     factor = ""
     mincondition = ""
     condition = ""
@@ -279,8 +268,6 @@ def GAMModel(data, Xcol, ycol, X, y, expect=1, epochs=100, splines='', chatGPT=0
         Xpre = np.round(Xpre, 3)
         ypre = np.around(ypre, 3)
         message.append("when " + Xcol[i] + " is " + str(Xpre) + ", the " + ycol + " is " + str(ypre) + ".")
-        # print(Xpre)
-        # print(ypre)
         # Find min & max
         maxpoint = signal.argrelextrema(gam.partial_dependence(term=i, X=XX), np.greater)
         minpoint = signal.argrelextrema(gam.partial_dependence(term=i, X=XX), np.less)
@@ -416,7 +403,7 @@ def GAMModel(data, Xcol, ycol, X, y, expect=1, epochs=100, splines='', chatGPT=0
             nss = nss + "the " + Xcol[i] + ", "
         else:
             ss = ss + "the " + Xcol[i] + ", "
-    print(message)
+    # print(message)
     return (gam, data, Xcol, ycol, r2, p, conflict, nss, ss, mincondition, condition,message)
 
 

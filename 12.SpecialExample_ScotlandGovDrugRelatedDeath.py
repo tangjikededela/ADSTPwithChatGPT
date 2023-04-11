@@ -1,6 +1,6 @@
 from pandas import read_csv
 import numpy
-import ADSTP.IntegratedPipeline as CT
+import IntegratedPipeline as CT
 
 # # Set the pipelines
 # pipelines = CT.special_datastory_pipelines_for_Scottish_government_report

@@ -97,7 +97,7 @@ pipeline = IP.general_datastory_pipeline
 readable_names = dict((kv.split(': ') for kv in (l.strip(' \n') for l in open('./data/readableNamesForTenData.txt'))))
 
 # Set the key
-key='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'
+key='sk-something'
 
 # # Read Linear dataset and set columns
 dataset = read_csv('./data/fish.csv')

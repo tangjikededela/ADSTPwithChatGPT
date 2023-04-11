@@ -361,7 +361,9 @@ def simple_trend(Xcol,ycol,Xforminy,Xformaxy,ave,miny,maxy):
     print(story)
 
 
-def LinearModelStats_view(data, Xcol, ycol, linearData, r2, questionset, trend,chatGPT=0,key=""):
+def LinearModelStats_view(data, Xcol, ycol, linearData, r2, questionset, expect,chatGPT=0,key=""):
+    if expect=="":
+        expect=["","",""]
     # Set for ChatGPT
     if chatGPT==1:
         URL, chatmodel, headers,messages=set_chatGPT(Xcol,ycol,modelname="linear",key=key)
@@ -382,9 +384,9 @@ def LinearModelStats_view(data, Xcol, ycol, linearData, r2, questionset, trend,c
     # Add to dashbord Linear Model Statistics
     fig = px.bar(linearData)
     question = linearQuestion.render(xcol=Xcol, ycol=ycol, qs=questionset, section=1, indeNum=np.size(Xcol),
-                                     trend=trend[0])
+                                     trend=expect[0])
     intro = linearSummary2.render(r2=r2, indeNum=np.size(Xcol), modelName="Linear Model", Xcol=Xcol,
-                                  ycol=ycol, qs=questionset, t=trend[0],expect=trend[1])
+                                  ycol=ycol, qs=questionset, t=expect[0],expect=expect[1])
     # intro = MicroLexicalization(intro)
     #set chatGPT
     aim = Xcol
@@ -410,9 +412,9 @@ def LinearModelStats_view(data, Xcol, ycol, linearData, r2, questionset, trend,c
     # Add to dashbord Xcol plots and data story
 
     for ind in linearData.index:
-        question = linearQuestion.render(xcol=ind, ycol=ycol, qs=questionset, section=2, indeNum=1, trend=trend[0])
+        question = linearQuestion.render(xcol=ind, ycol=ycol, qs=questionset, section=2, indeNum=1, trend=expect[0])
         conflict = linearSummary.render(xcol=ind, ycol=ycol, coeff=linearData['coeff'][ind],
-                                        p=linearData['pvalue'][ind], qs=questionset, expect=trend[2])
+                                        p=linearData['pvalue'][ind], qs=questionset, expect=expect[2])
 
         # newstory = MicroLexicalization(story)
         if abs(linearData['coeff'][ind]) == max(abs(linearData['coeff'])):
@@ -445,8 +447,8 @@ def LinearModelStats_view(data, Xcol, ycol, linearData, r2, questionset, trend,c
             dash_tab_add(listTabs, ind, children)
 
         i = i + 1
-    question = linearQuestion.render(xcol="", ycol=ycol, qs=questionset, section=3, indeNum=1, trend=trend[0])
-    summary = linearSummary3.render(imp=imp, ycol=ycol, nss=nss, ss=ss, pf=pf, nf=nf, t=trend[0], r2=r2,
+    question = linearQuestion.render(xcol="", ycol=ycol, qs=questionset, section=3, indeNum=1, trend=expect[0])
+    summary = linearSummary3.render(imp=imp, ycol=ycol, nss=nss, ss=ss, pf=pf, nf=nf, t=expect[0], r2=r2,
                                     qs=questionset)
     if chatGPT == 1:
         payload, messages= set_payload(question,messages)
@@ -621,12 +623,17 @@ def GradientBoostingModelStats_view(data, Xcol, ycol, GBmodel, mse, rmse, r2, im
     plt.savefig('pictures/{}.png'.format("GB1"))
     plt.clf()
 
-    os.environ["PATH"] += os.pathsep + 'C:/Program Files/Graphviz/bin/'
-    export_graphviz(GBmodel.estimators_[5][0], out_file='pictures/small_tree.dot', feature_names=Xcol, rounded=True,
-                    precision=1, node_ids=True)
-    (graph,) = pydot.graph_from_dot_file('pictures/small_tree.dot')
-    graph.write_png('pictures/small_tree.png', prog=['dot'])
-    encoded_image = base64.b64encode(open("pictures/small_tree.png", 'rb').read()).decode('ascii')
+    # os.environ["PATH"] += os.pathsep + 'C:/Program Files/Graphviz/bin/'
+    # export_graphviz(GBmodel.estimators_[5][0], out_file='pictures/small_tree.dot', feature_names=Xcol, rounded=True,
+    #                 precision=1, node_ids=True)
+    # (graph,) = pydot.graph_from_dot_file('pictures/small_tree.dot')
+    # graph.write_png('pictures/small_tree.png', prog=['dot'])
+    # encoded_image = base64.b64encode(open("pictures/small_tree.png", 'rb').read()).decode('ascii')
+
+    fig, ax = plt.subplots(nrows=1, ncols=1,figsize=(20, 10))  # Set the figure size as desired
+    tree.plot_tree(GBmodel.estimators_[0][0], ax=ax,feature_names=Xcol,rounded=True,precision=1, node_ids=True)
+    plt.savefig('pictures/tree_figure.png')
+    encoded_image= base64.b64encode(open("pictures/tree_figure.png", 'rb').read()).decode('ascii')
 
     _base64 = []
     _base64.append(base64.b64encode(open('pictures/{}.png'.format("GB1"), 'rb').read()).decode('ascii'))
