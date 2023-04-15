@@ -129,7 +129,7 @@ class general_datastory_for_pycaret_pipelines():
 
 
 class general_datastory_pipeline:
-    def LinearFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1], expect="",chatGPT=0,key=""):
+    def LinearFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1], expect="",chatGPT=0,key="",portnum=8050):
         # "expect" is a list of size 3:
         # The first value: 0 means that the user wants to explore how to make the dependent variable as small as possible, and 1 means how to make the dependent variable as large as possible.
         # The second value: 0 means that the user expects a weak relationship between the dependent variable and the independent variable, and 1 means a strong relationship.
@@ -140,52 +140,62 @@ class general_datastory_pipeline:
         X = data[Xcol].values
         y = data[ycol]
         columns, linearData, predicted, mse, rmse, r2 = MD.LinearDefaultModel(X, y, Xcol)
-        VW.LinearModelStats_view(data, Xcol, ycol, linearData, r2, questionset, expect,chatGPT,key)
+        VW.LinearModelStats_view(data, Xcol, ycol, linearData, r2, questionset, expect,chatGPT,key,portnum)
 
-    def LogisticFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1],chatGPT=0,key=""):
+    def LogisticFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1],chatGPT=0,key="",portnum=8050):
         if Xnewname != "" or ynewname != "":
             data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
         X = data[Xcol].values
         y = data[ycol]
         columns1, logisticData1, columns2, logisticData2, r2 = MD.LogisticrDefaultModel(X, y, Xcol)
-        VW.LogisticModelStats_view(data, Xcol, ycol, logisticData1, logisticData2, r2, questionset,chatGPT,key)
+        VW.LogisticModelStats_view(data, Xcol, ycol, logisticData1, logisticData2, r2, questionset,chatGPT,key,portnum)
 
     def GradientBoostingFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1],
                                    gbr_params={'n_estimators': 500, 'max_depth': 3, 'min_samples_split': 5,
-                                               'learning_rate': 0.01},chatGPT=0,key=""):
+                                               'learning_rate': 0.01},chatGPT=0,key="",portnum=8050):
         if Xnewname != "" or ynewname != "":
             data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
         X = data[Xcol].values
         y = data[ycol]
         GBmodel, mse, rmse, r2,imp,train_errors,test_errors,DTData = MD.GradientBoostingDefaultModel(X, y, Xcol, gbr_params)
-        VW.GradientBoostingModelStats_view(data, Xcol, ycol, GBmodel, mse, rmse, r2,imp, questionset, gbr_params,train_errors,test_errors,DTData,chatGPT,key)
+        VW.GradientBoostingModelStats_view(data, Xcol, ycol, GBmodel, mse, rmse, r2,imp, questionset, gbr_params,train_errors,test_errors,DTData,chatGPT,key,portnum)
 
     def RandomForestFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1], n_estimators=10,
-                               max_depth=3):
+                               max_depth=3,portnum=8050):
         if Xnewname != "" or ynewname != "":
             data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
         X = data[Xcol].values
         y = data[ycol]
         tree_small, rf_small, DTData, r2, mse, rmse = MD.RandomForestDefaultModel(X, y, Xcol, n_estimators, max_depth)
-        VW.RandomForestModelStats_view(data, Xcol, ycol, tree_small, rf_small, DTData, r2, mse, questionset)
+        VW.RandomForestModelStats_view(data, Xcol, ycol, tree_small, rf_small, DTData, r2, mse, questionset,portnum)
 
-    def DecisionTreeFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1], max_depth=3):
+    def DecisionTreeFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1], max_depth=3,portnum=8050):
         if Xnewname != "" or ynewname != "":
             data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
         X = data[Xcol].values
         y = data[ycol]
         DTmodel, r2, mse, rmse, DTData = MD.DecisionTreeDefaultModel(X, y, Xcol, max_depth)
-        VW.DecisionTreeModelStats_view(data, Xcol, ycol, DTData, DTmodel, r2, mse, questionset)
+        VW.DecisionTreeModelStats_view(data, Xcol, ycol, DTData, DTmodel, r2, mse, questionset,portnum)
 
-    def GAMsFit(data, Xcol, ycol, Xnewname="", ynewname="", expect=1, epochs=100, splines='',chatGPT=0,key=""):
+    def GAMsFit(data, Xcol, ycol, Xnewname="", ynewname="", expect=1, epochs=100, splines='',chatGPT=0,key="",portnum=8050):
         if Xnewname != "" or ynewname != "":
             data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
         X = data[Xcol].values
         y = data[ycol]
         gam, data, Xcol, ycol, r2, p, conflict, nss, ss, mincondition, condition,message= MD.GAMModel(data, Xcol, ycol,X, y,
                                                                                                expect, epochs, splines,chatGPT)
+        VW.GAMs_view(gam, data, Xcol, ycol, r2, p, conflict, nss, ss, mincondition, condition,chatGPT=chatGPT,key=key,predict=message,portnum=portnum)
+    def RidgeClassifierFit(data,Xcol,ycol,class1,class2,Xnewname="", ynewname=""):
+        if Xnewname != "" or ynewname != "":
+            data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
+        rclf,pca,y_test, y_prob,roc_auc,X_pca,accuracy,importances=MD.RidgeClassifierModel(data, Xcol, ycol,class1,class2)
+        VW.RidgeClassifier_view(data,Xcol,ycol,rclf,pca,y_test, y_prob,roc_auc,X_pca,accuracy,importances,class1,class2)
+    def KNeighborsClassifierFit(data,Xcol,ycol,Xnewname="", ynewname="",Knum=3,cvnum=5):
+        if Xnewname != "" or ynewname != "":
+            data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
+        accuracy, precision, feature_importances, recall, f1, confusionmatrix, cv_scores=MD.KNeighborsClassifierModel(data, Xcol, ycol,Knum,cvnum)
+        VW.KNeighborsClassifier_view(data,Xcol,ycol,accuracy,precision,feature_importances,recall,f1,confusionmatrix,cv_scores)
 
-        VW.GAMs_view(gam, data, Xcol, ycol, r2, p, conflict, nss, ss, mincondition, condition,chatGPT=chatGPT,key=key,predict=message)
 
 class special_datastory_pipelines_for_ACCCP:
     def register_question1(app_name, listTabs, register_dataset, per1000inCity_col, per1000nation_col,

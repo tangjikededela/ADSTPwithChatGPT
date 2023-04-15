@@ -14,7 +14,7 @@ redwine_dataset = read_csv("./data/winequalityred.csv", header=None, names=col_n
 pipeline = IP.general_datastory_pipeline
 pipeline.LinearFit(redwine_dataset,
                    ["citric acid", "chlorides", "free sulfur dioxide", "total sulfur dioxide", "sulphates", "alcohol"],
-                   "quality")
+                   "quality",portnum=8051)
 
 # # # Example 2: A more complex example.
 # # Choose a model, do the dataset cleaning before fitting it to a model.
@@ -38,4 +38,4 @@ readable_names = dict((kv.split(': ') for kv in (l.strip(' \n') for l in open('.
 pipeline = IP.general_datastory_pipeline
 pipeline.LinearFit(dataset, ['pctWPubAsst', 'PctHousLess3BR', 'PctPersOwnOccup'], 'ViolentCrimesPerPop',
                    [readable_names.get(key) for key in ['pctWPubAsst', 'PctHousLess3BR', 'PctPersOwnOccup']],
-                   readable_names.get('ViolentCrimesPerPop'), questionset=[1, 1, 1, 1], trend=[1,1,1])
+                   readable_names.get('ViolentCrimesPerPop'), questionset=[1, 1, 1, 1], trend=[1,1,1],portnum=8052)

@@ -1,0 +1,4 @@
+Above is the figure of the confusion matrix.
+And the cross-validation mean score of the model is {{cv}}.
+As a rough guideline, that indicates {%-if cv > 0.8%} the model performance is good. {%-else%} the model performance may not be good enough. {%endif%}
+However, the specific threshold for what is considered good can vary depending on the problem, dataset, and evaluation criteria.

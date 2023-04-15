@@ -1,10 +1,14 @@
 # Overview:
 This tutorial provides an overview of how you can use ADSTP in your data exploration workflow.
 
-Note: This tutorial assumes that you have already cloned ADSTP and the required packages, if you have not done so already, please check out this [page](https://github.com/tangjikededela/ADSTP).
+Note: This tutorial assumes that you have already cloned ADSTP, if you have not done so already, please check out this [page](https://github.com/tangjikededela/ADSTP).
 
 # Quick Start Example
-Before everything starts, please make sure that the Python version is 3.10.6, and use the following commands to install the necessary packages:
+Before everything starts, please make sure that the Python version is 3.10.6, and Microsoft Visual C++ 14.0 or greater is required. Get it with: ["Microsoft C++ Build Tools"](https://visualstudio.microsoft.com/visual-cpp-build-tools/). Then, please use the following commands to install the 'pygam' first:
+```
+pip install pygam
+```
+Then use the following commands to install other necessary packages:
 ```
 pip install -r requirements.txt
 ```

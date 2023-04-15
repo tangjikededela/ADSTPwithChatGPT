@@ -20,8 +20,13 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn import metrics
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import mean_squared_error, accuracy_score
+from sklearn.linear_model import RidgeClassifier
+from sklearn.decomposition import PCA
+from sklearn.metrics import mean_squared_error, accuracy_score,accuracy_score, confusion_matrix,precision_score, recall_score, f1_score, roc_auc_score, roc_curve
+from sklearn.model_selection import cross_val_score
 from pygam import LinearGAM, s, f, te
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.feature_selection import mutual_info_classif
 import statsmodels.api as sm
 import scipy.signal as signal
 import math
@@ -405,6 +410,67 @@ def GAMModel(data, Xcol, ycol, X, y, expect=1, epochs=100, splines='', chatGPT=0
             ss = ss + "the " + Xcol[i] + ", "
     # print(message)
     return (gam, data, Xcol, ycol, r2, p, conflict, nss, ss, mincondition, condition,message)
+
+def RidgeClassifierModel(dataset, Xcol, ycol,class1,class2):
+    X = dataset[Xcol]
+    y = dataset[ycol]
+    y = y.map({class1: 0, class2: 1})
+    # Split the data into train and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Instantiate the RidgeClassifier model
+    rclf = RidgeClassifier()
+
+    # Fit the model to the training data
+    rclf.fit(X_train, y_train)
+
+    # Make predictions on the test data
+    y_pred = rclf.predict(X_test)
+
+    # Compute accuracy, precision, recall, F1-score
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    # Compute area under the ROC curve
+    y_prob = rclf.decision_function(X_test)
+    roc_auc = roc_auc_score(y_test, y_prob)
+
+    # Perform PCA for dimensionality reduction
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X_test)
+
+    # Compute feature importances
+    importances = rclf.coef_[0]
+
+    return (rclf,pca,y_test, y_prob,roc_auc,X_pca,accuracy,importances)
+
+
+def KNeighborsClassifierModel(dataset, Xcol, ycol,Knum=3,cvnum=5):
+    # Extract the feature matrix X and target vector y
+    X = dataset[Xcol]
+    y = dataset[ycol]
+    # Split the data into train and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Instantiate the K Neighbors Classifier model
+    k = Knum  # Number of neighbors to consider
+    clf = KNeighborsClassifier(n_neighbors=k)
+    # Fit the model to the training data
+    clf.fit(X_train, y_train)
+    # Make predictions on the test data
+    y_pred = clf.predict(X_test)
+    # Compute accuracy, precision, recall, F1-score
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, average='weighted')
+    recall = recall_score(y_test, y_pred, average='weighted')
+    f1 = f1_score(y_test, y_pred, average='weighted')
+    # Calculate mutual information between each feature and the target variable
+    feature_importances = mutual_info_classif(X, y)
+    # Calculate confusion matrix
+    confusionmatrix = confusion_matrix(y_test, y_pred)
+    # Calculate cross-validation scores
+    cv_scores = cross_val_score(clf, X, y, cv=cvnum)
+    return (accuracy,precision,feature_importances,recall,f1,confusionmatrix,cv_scores)
 
 
 def loop_mean_compare(dataset, Xcol, ycol):
