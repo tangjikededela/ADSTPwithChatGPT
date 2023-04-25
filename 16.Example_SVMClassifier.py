@@ -6,4 +6,4 @@ irisdata = pd.read_csv('./data/Iris.csv',header=0)  # Replace 'your_dataset.csv'
 Xcol=['SepalLengthCm','SepalWidthCm','PetalLengthCm','PetalWidthCm']
 ycol='Species'
 pipeline = IP.general_datastory_pipeline
-pipeline.KNeighborsClassifierFit(irisdata,Xcol,ycol)
+pipeline.SVMClassifierFit(irisdata,Xcol,ycol)

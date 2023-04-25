@@ -129,7 +129,7 @@ class general_datastory_for_pycaret_pipelines():
 
 
 class general_datastory_pipeline:
-    def LinearFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1], expect="",chatGPT=0,key="",portnum=8050):
+    def LinearFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1], expect="",chatGPT=0,key="",sk=0,portnum=8050):
         # "expect" is a list of size 3:
         # The first value: 0 means that the user wants to explore how to make the dependent variable as small as possible, and 1 means how to make the dependent variable as large as possible.
         # The second value: 0 means that the user expects a weak relationship between the dependent variable and the independent variable, and 1 means a strong relationship.
@@ -139,7 +139,10 @@ class general_datastory_pipeline:
             data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
         X = data[Xcol].values
         y = data[ycol]
-        columns, linearData, predicted, mse, rmse, r2 = MD.LinearDefaultModel(X, y, Xcol)
+        if sk==1:
+            columns, linearData,r2=MD.LinearSKDefaultModel(X, y, Xcol)
+        elif sk==0:
+            columns, linearData, predicted, mse, rmse, r2 = MD.LinearDefaultModel(X, y, Xcol)
         VW.LinearModelStats_view(data, Xcol, ycol, linearData, r2, questionset, expect,chatGPT,key,portnum)
 
     def LogisticFit(data, Xcol, ycol, Xnewname="", ynewname="", questionset=[1, 1, 1, 1],chatGPT=0,key="",portnum=8050):
@@ -195,6 +198,11 @@ class general_datastory_pipeline:
             data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
         accuracy, precision, feature_importances, recall, f1, confusionmatrix, cv_scores=MD.KNeighborsClassifierModel(data, Xcol, ycol,Knum,cvnum)
         VW.KNeighborsClassifier_view(data,Xcol,ycol,accuracy,precision,feature_importances,recall,f1,confusionmatrix,cv_scores)
+    def SVMClassifierFit(data,Xcol,ycol,Xnewname="", ynewname="",kernel='linear', C=1.0,cvnum=5):
+        if Xnewname != "" or ynewname != "":
+            data, Xcol, ycol = variablenamechange(data, Xcol, ycol, Xnewname, ynewname)
+        accuracy,precision,recall,f1,confusionmatrix,cv_scores = MD.SVCClassifierModel(data, Xcol, ycol,kernel=kernel, C=C,cvnum=cvnum)
+        VW.SVCClassifier_view(data,Xcol,ycol,accuracy,precision,recall,f1,confusionmatrix,cv_scores)
 
 
 class special_datastory_pipelines_for_ACCCP:

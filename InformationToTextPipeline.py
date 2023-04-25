@@ -60,7 +60,7 @@ classifierf1=env.get_template('classifierF1score.txt')
 classifierimp=env.get_template('classifierImportant.txt')
 ridgequestionset=env.get_template('ridgeQuestionset.txt')
 ridgedecision=env.get_template('ridgeDecision.txt')
-kneighquestionset=env.get_template('KneighborsQuestionset.txt')
+classifierquestionset=env.get_template('classifierQuestionset.txt')
 # For some basic function
 basicdescription = env.get_template('basicdescription.txt')
 simpletrend=env.get_template('simpletrend.txt')
@@ -694,7 +694,7 @@ def KNeighborsClassifier_view(data,Xcol,ycol,accuracy,precision,feature_importan
     _base64.append(base64.b64encode(open('pictures/{}.png'.format("imp"), 'rb').read()).decode('ascii'))
     plt.clf()
 
-    question=kneighquestionset.render(section=1)
+    question=classifierquestionset.render(section=1)
     intro=classifieraccuracy.render(accuracy=round(accuracy,3),classifiername="K neighbors classifier")
     aim = Xcol
     aim.insert(0, ycol)
@@ -705,19 +705,19 @@ def KNeighborsClassifier_view(data,Xcol,ycol,accuracy,precision,feature_importan
     dash_tab_add(listTabs, 'KNeighborsClassifierStats', children)
     aim.remove(ycol)
 
-    question = kneighquestionset.render(section=2)
+    question = classifierquestionset.render(section=2)
     modelStory=classifierf1.render(f1=round(f1,3))
     children = [html.Img(src='data:image/png;base64,{}'.format(_base64[0])), html.P(question), html.Br(),
                 html.P(modelStory)]
     dash_tab_add(listTabs, "Model Evaluation Metrics", children)
 
-    question = kneighquestionset.render(section=3)
-    crossvalidStory=classifiercv.render(cv=round(cv_scores.mean(),3))
+    question = classifierquestionset.render(section=3)
+    crossvalidStory=classifiercv.render(cv=round(cv_scores.mean(),3),cm=confusionmatrix)
     children = [html.Img(src='data:image/png;base64,{}'.format(_base64[1])), html.P(question), html.Br(),
                 html.P(crossvalidStory)]
     dash_tab_add(listTabs, "Confusion Matrix and Cross-validation", children)
 
-    question = kneighquestionset.render(section=4)
+    question = classifierquestionset.render(section=4)
     ImpStory=classifierimp.render(imp=imp)
     children = [html.Img(src='data:image/png;base64,{}'.format(_base64[2])), html.P(question), html.Br(),
                 html.P(ImpStory)]
@@ -725,7 +725,71 @@ def KNeighborsClassifier_view(data,Xcol,ycol,accuracy,precision,feature_importan
 
     run_app(KNei_app, listTabs)
 
+def SVCClassifier_view(data,Xcol,ycol,accuracy,precision,recall,f1,confusionmatrix,cv_scores):
+    _base64 = []
+    svm_app, listTabs = start_app()
 
+    # Create a dictionary to store the evaluation metrics
+    metrics = {"Accuracy": accuracy, "Precision": precision, "Recall": recall, "F1-score": f1}
+    # Plot the evaluation metrics
+    plt.bar(metrics.keys(), metrics.values())
+    plt.xlabel("Metrics")
+    plt.ylabel("Score")
+    plt.title("Model Evaluation Metrics")
+    plt.savefig('pictures/{}.png'.format("Metrics"))
+    _base64.append(base64.b64encode(open('pictures/{}.png'.format("Metrics"), 'rb').read()).decode('ascii'))
+    plt.clf()
+
+    # Plot confusion matrix
+    sns.heatmap(confusionmatrix, annot=True, fmt="d", cmap="Blues", cbar=False)
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.savefig('pictures/{}.png'.format("confusionmatrix"))
+    _base64.append(base64.b64encode(open('pictures/{}.png'.format("confusionmatrix"), 'rb').read()).decode('ascii'))
+    plt.clf()
+
+    question=classifierquestionset.render(section=1)
+    intro=classifieraccuracy.render(accuracy=round(accuracy,3),classifiername="Support Vector Machine model")
+    aim = Xcol
+    aim.insert(0, ycol)
+    children = [html.P(question), html.Br(), html.P(intro),dash_table.DataTable(data[aim].to_dict('records'),
+                                     [{"name": i, "id": i} for i in
+                                      data[aim].columns], style_table={'height': '400px', 'overflowY': 'auto'})]
+
+    dash_tab_add(listTabs, 'SupportVectorMachineModelStats', children)
+    aim.remove(ycol)
+
+    question = classifierquestionset.render(section=2)
+    modelStory=classifierf1.render(f1=round(f1,3))
+    children = [html.Img(src='data:image/png;base64,{}'.format(_base64[0])), html.P(question), html.Br(),
+                html.P(modelStory)]
+    dash_tab_add(listTabs, "Model Evaluation Metrics", children)
+
+    question = classifierquestionset.render(section=3)
+    crossvalidStory=classifiercv.render(cv=round(cv_scores.mean(),3),cm=confusionmatrix)
+    children = [html.Img(src='data:image/png;base64,{}'.format(_base64[1])), html.P(question), html.Br(),
+                html.P(crossvalidStory)]
+    dash_tab_add(listTabs, "Confusion Matrix and Cross-validation", children)
+
+    run_app(svm_app, listTabs)
+
+def kmeancluster_view(wcss,minnum_clusters,maxnum_clusters,summary,best_n_clusters,silhouette_score_value,calinski_harabasz_score_value,davies_bouldin_score_value):
+    _base64 = []
+    kmeancluster_app, listTabs = start_app()
+
+    plt.plot(range(minnum_clusters, maxnum_clusters), wcss)
+    plt.title('Elbow Method')
+    plt.xlabel('Number of clusters')
+    plt.ylabel('WCSS')
+    plt.savefig('pictures/{}.png'.format("ElbowMethod"))
+    _base64.append(base64.b64encode(open('pictures/{}.png'.format("ElbowMethod"), 'rb').read()).decode('ascii'))
+    plt.clf()
+
+    print(summary)
+    print(best_n_clusters)
+    print('Silhouette Score: {:.3f}'.format(silhouette_score_value))
+    print('Calinski Harabasz Score: {:.3f}'.format(calinski_harabasz_score_value))
+    print('davies bouldin score: {:.3f}'.format(davies_bouldin_score_value))
 
 def TreeExplain(model, Xcol):
     n_nodes = model.tree_.node_count

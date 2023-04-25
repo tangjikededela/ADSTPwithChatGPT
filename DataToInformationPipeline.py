@@ -10,19 +10,22 @@ import heapq
 import pwlf
 from GPyOpt.methods import BayesianOptimization
 from sklearn.neighbors import LocalOutlierFactor
+from sklearn.preprocessing import StandardScaler
 from sklearn import preprocessing
 from iteration_utilities import duplicates, unique_everseen
 from scipy.signal import argrelextrema
 from sklearn import ensemble
+from sklearn.cluster import KMeans
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
+from sklearn.svm import SVC
 from sklearn import metrics
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import RidgeClassifier
 from sklearn.decomposition import PCA
-from sklearn.metrics import mean_squared_error, accuracy_score,accuracy_score, confusion_matrix,precision_score, recall_score, f1_score, roc_auc_score, roc_curve
+from sklearn.metrics import r2_score,mean_squared_error, silhouette_score, calinski_harabasz_score, davies_bouldin_score,accuracy_score,accuracy_score, confusion_matrix,precision_score, recall_score, f1_score, roc_auc_score, roc_curve
 from sklearn.model_selection import cross_val_score
 from pygam import LinearGAM, s, f, te
 from sklearn.neighbors import KNeighborsClassifier
@@ -130,6 +133,24 @@ def RMSE(renderdModel, X_test, y_test):
     rmse = metrics.mean_squared_error(y_test, y_predict, squared=False)
     return rmse
 
+def LinearSKDefaultModel(X, y, Xcol):
+    # use sm for P-values
+    X = sm.add_constant(X)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+    smmodel = sm.OLS(y_train, X_train).fit()
+
+    y = y.values.reshape(-1, 1)
+    # perform linear regression
+    model = LinearRegression().fit(X, y)
+
+    # get the coefficient
+    coef = model.coef_
+    columns = {'coeff': coef[0][1:], 'pvalue': smmodel.pvalues.round(4).values[1:]}
+    linearData = DataFrame(data=columns, index=Xcol)
+    # calculate the r-squared value
+    y_pred = model.predict(X)
+    r2 = r2_score(y, y_pred)
+    return (columns, linearData, r2)
 
 def LinearDefaultModel(X, y, Xcol):
     X = sm.add_constant(X)
@@ -144,7 +165,6 @@ def LinearDefaultModel(X, y, Xcol):
     r2 = model.rsquared
 
     return (columns, linearData, predicted, mse, rmse, r2)
-
 
 def LogisticrDefaultModel(X, y, Xcol):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
@@ -472,6 +492,70 @@ def KNeighborsClassifierModel(dataset, Xcol, ycol,Knum=3,cvnum=5):
     cv_scores = cross_val_score(clf, X, y, cv=cvnum)
     return (accuracy,precision,feature_importances,recall,f1,confusionmatrix,cv_scores)
 
+def SVCClassifierModel(dataset, Xcol, ycol,kernel='linear', C=1.0,cvnum=5):
+    # Extract the feature matrix X and target vector y
+    X = dataset[Xcol]
+    y = dataset[ycol]
+    # Split the data into train and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Instantiate the Support Vector Machine (SVM) model
+    clf = SVC(kernel=kernel, C=C)  # Linear kernel with regularization parameter C=1.0
+    # Fit the model to the training data
+    clf.fit(X_train, y_train)
+    # Make predictions on the test data
+    y_pred = clf.predict(X_test)
+    # Compute accuracy, precision, recall, F1-score
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, average='weighted')
+    recall = recall_score(y_test, y_pred, average='weighted')
+    f1 = f1_score(y_test, y_pred, average='weighted')
+    # Calculate confusion matrix
+    confusionmatrix = confusion_matrix(y_test, y_pred)
+    cv_scores = cross_val_score(clf, X, y, cv=cvnum)  # 5-fold cross-validation
+    return (accuracy,precision,recall,f1,confusionmatrix,cv_scores)
+
+def kmeanclustermodel(Xcol, df_agg,minnum_clusters=1,maxnum_clusters=11,n_clusters=5):
+    # Select features for segmentation
+    X = df_agg[Xcol].values
+
+    # Standardize features
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # Determine optimal number of clusters
+    wcss = []
+    for i in range(minnum_clusters, maxnum_clusters):
+        kmeans = KMeans(n_clusters=i, init='k-means++', random_state=42)
+        kmeans.fit(X_scaled)
+        wcss.append(kmeans.inertia_)
+
+    # find the elbow point
+    diffs = np.diff(wcss)
+    diffs_ratio = diffs[1:] / diffs[:-1]
+    elbow_point = np.argmin(diffs_ratio) + 1
+
+    # store the optimal number of clusters
+    best_n_clusters = elbow_point + 1
+
+    # Apply k-means clustering
+    n_clusters = n_clusters
+    kmeans = KMeans(n_clusters=n_clusters, init='k-means++', random_state=42)
+    y_pred = kmeans.fit_predict(X_scaled)
+
+    # Print summary statistics by cluster
+    summary = df_agg.groupby('Cluster').agg({col: 'sum' for col in Xcol})
+    print(summary)
+
+    # Calculate and print clustering performance metrics
+    silhouette_score_value = silhouette_score(X_scaled, y_pred)
+    calinski_harabasz_score_value = calinski_harabasz_score(X_scaled, y_pred)
+    davies_bouldin_score_value = davies_bouldin_score(X_scaled, y_pred)
+
+    print('Silhouette Score: {:.3f}'.format(silhouette_score_value))
+    print('Calinski Harabasz Score: {:.3f}'.format(calinski_harabasz_score_value))
+    print('davies bouldin score: {:.3f}'.format(davies_bouldin_score_value))
+
+    return (wcss,summary,best_n_clusters,silhouette_score_value,calinski_harabasz_score_value,davies_bouldin_score_value)
 
 def loop_mean_compare(dataset, Xcol, ycol):
     diff = [0] * np.size(Xcol)
